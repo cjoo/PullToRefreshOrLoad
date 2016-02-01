@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <Button
+        android:id="@+id/btn_listView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="btn_listView" />
+
+    <Button
+        android:id="@+id/btn_scrollView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_listView"
+        android:layout_centerHorizontal="true"
+        android:text="btn_scrollView" />
+
+    <Button
+        android:id="@+id/btn_gridView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_scrollView"
+        android:layout_centerHorizontal="true"
+        android:text="btn_gridView" />
+
+    <Button
+        android:id="@+id/btn_webView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_gridView"
+        android:layout_centerHorizontal="true"
+        android:text="btn_webView" />
+
+    <Button
+        android:id="@+id/btn_textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_webView"
+        android:layout_centerHorizontal="true"
+        android:text="btn_textView" />
+    <Button
+        android:id="@+id/btn_editView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_textView"
+        android:layout_centerHorizontal="true"
+        android:text="btn_editView" />
+    <Button
+        android:id="@+id/btn_expandableListView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_editView"
+        android:layout_centerHorizontal="true"
+        android:text="btn_expandableListView" />
+    <Button
+        android:id="@+id/btn_viewPager"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_expandableListView"
+        android:layout_centerHorizontal="true"
+        android:text="btn_viewPager" />
+    <Button
+        android:id="@+id/btn_CJ"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_viewPager"
+        android:layout_centerHorizontal="true"
+        android:text="btn_CJ" />
+
+</RelativeLayout>
