@@ -1,3 +1,4 @@
+![](http://a4.qpic.cn/psb?/V10dK3v20JUav3/MJ09fEulJQ6q.SAnaNFctFCQSjXbOGIXBQDxDkMTjPo!/b/dG8BAAAAAAAA&ek=1&kp=1&pt=0&bo=4AFWA.ABVgMCCCw!&sce=0-12-12&rf=0-18)
 #xml布局文件(activity_listview)：
   <com.cj.android.touchpull.TouchPullView xmlns:android="http://schemas.android.com/apk/res/android"
   
