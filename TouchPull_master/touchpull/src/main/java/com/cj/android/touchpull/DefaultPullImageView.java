@@ -119,9 +119,17 @@ public class DefaultPullImageView extends APullImageView {
         float toYValue = 0;
         if (direction.type == Direction.DOWN_PULL) {
             rollBackAnimationListener.pullViewAnimationEndLocationTop = (float) touchPullView.getTop() + MOVE_DISTANCE;
+            if (this.getTopRelativeParentOfParent() >= touchPullView.getBottom()) {
+                rollBackAnimationListener.onAnimationEnd(null);
+                return;
+            }
             toYValue = -((float) this.getTopRelativeParentOfParent() -  touchPullView.getTop() - MOVE_DISTANCE) /  this.getHeight();
         } else if (direction.type == Direction.UP_PULL) {
             rollBackAnimationListener.pullViewAnimationEndLocationTop = (float) touchPullView.getBottom() - MOVE_DISTANCE -  this.getHeight();
+            if (this.getBottomRelativeParentOfParent() <= touchPullView.getTop()) {
+                rollBackAnimationListener.onAnimationEnd(null);
+                return;
+            }
             toYValue = ((float) touchPullView.getBottom() -  this.getBottomRelativeParentOfParent() - MOVE_DISTANCE) /  this.getHeight();
         }
 
