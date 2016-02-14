@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding" defaultCharsetForPropertiesFiles="UTF-8">
+    <file url="file://$PROJECT_DIR$/app/src/main/java/com/cj/android/touchpull2_master/ListViewActivity.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/com/cj/android/touchpull2_master/MainActivity.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/touchpull2/src/main/java/com/cj/android/touchpull2/BasePullView.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/touchpull2/src/main/java/com/cj/android/touchpull2/DefaultPullView.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/touchpull2/src/main/java/com/cj/android/touchpull2/TouchPull2View.java" charset="UTF-8" />
+    <file url="PROJECT" charset="UTF-8" />
+  </component>
+</project>
