@@ -38,9 +38,10 @@ public class DefaultPullImageView extends APullImageView {
         this.setAlpha(0.6f);
     }
 
-    public void init() {
+    @Override
+    protected void init() {
+        super.init();
         setImageResource(R.drawable.ic_loading);
-        this.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -118,19 +119,19 @@ public class DefaultPullImageView extends APullImageView {
         //计算toYValue
         float toYValue = 0;
         if (direction.type == Direction.DOWN_PULL) {
-            rollBackAnimationListener.pullViewAnimationEndLocationTop = (float) touchPullView.getTop() + MOVE_DISTANCE;
+            rollBackAnimationListener.pullViewAnimationEndLocationTop = (float) touchPullView.getTop() + getMoveDistance();
             if (this.getTopRelativeParentOfParent() >= touchPullView.getBottom()) {
                 rollBackAnimationListener.onAnimationEnd(null);
                 return;
             }
-            toYValue = -((float) this.getTopRelativeParentOfParent() -  touchPullView.getTop() - MOVE_DISTANCE) /  this.getHeight();
+            toYValue = -((float) this.getTopRelativeParentOfParent() - touchPullView.getTop() - getMoveDistance()) / this.getHeight();
         } else if (direction.type == Direction.UP_PULL) {
-            rollBackAnimationListener.pullViewAnimationEndLocationTop = (float) touchPullView.getBottom() - MOVE_DISTANCE -  this.getHeight();
+            rollBackAnimationListener.pullViewAnimationEndLocationTop = (float) touchPullView.getBottom() - getMoveDistance() - this.getHeight();
             if (this.getBottomRelativeParentOfParent() <= touchPullView.getTop()) {
                 rollBackAnimationListener.onAnimationEnd(null);
                 return;
             }
-            toYValue = ((float) touchPullView.getBottom() -  this.getBottomRelativeParentOfParent() - MOVE_DISTANCE) /  this.getHeight();
+            toYValue = ((float) touchPullView.getBottom() - this.getBottomRelativeParentOfParent() - getMoveDistance()) / this.getHeight();
         }
 
         TranslateAnimation translate = new TranslateAnimation(

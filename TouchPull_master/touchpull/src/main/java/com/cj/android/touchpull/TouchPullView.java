@@ -1,6 +1,9 @@
 package com.cj.android.touchpull;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -11,10 +14,11 @@ import android.webkit.WebView;
 import android.widget.AbsListView;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * 支持ListView,GridView,ExpandableListView,ScrollView...
@@ -38,6 +42,12 @@ public class TouchPullView extends RelativeLayout {
     private static final int ROLLING = 5;//回滚中（拉拽过远，回滚到指定的位置）
     private int doMainType = NONE;//正在做的事情,可能的值（NONE，REFRESHING，LOADING，COMPLETING，CANCELING，ROLLING）
     private TouchPullListener touchPull;//回调接口对象
+    private Timer simulationFingersTimer;//模拟手指触摸定时器
+    private long simulationFingersTimeInterval;//前后两次触摸间隔
+    private int simulationFingersAllNumber;//一次完整的模拟所需总共触摸次数
+    private float simulationFingersStep;//步长
+    private static final int SIMULATION_META_STATE = 1;//模拟手指触的MetaState(识别模拟还是真实触摸)
+    private boolean simulationFingering = false;//正在模拟触摸中
 
     public TouchPullView(Context context) {
         super(context);
@@ -77,6 +87,90 @@ public class TouchPullView extends RelativeLayout {
     public void setRefreshingOrLoadingOverScrollEnabled(boolean refreshingOrLoadingOverScrollEnabled) {
         this.refreshingOrLoadingOverScrollEnabled = refreshingOrLoadingOverScrollEnabled;
     }
+
+    /**
+     * 置为刷新(模拟手指触摸)
+     * 建议在activity生命周期onWindowFocusChanged中调用该方法
+     */
+    public void autoRefresh() {
+        printLog("step MOVE_DISTANCE:"+pullImageView.getMoveDistance());
+        printLog("step pullImageView.getHeight():"+pullImageView.getHeight());
+        float step = (pullImageView.getMoveDistance() + pullImageView.getHeight())
+                / (20 - 5f);
+        printLog("step:"+step);
+        simulationPullDown(0, 20, step, step * 20);
+    }
+
+    /**
+     * 模拟下拉
+     *
+     * @param delay
+     * @param timeInterval 前后两次触摸间隔
+     * @param step         步长
+     * @param distance     距离
+     */
+    public void simulationPullDown(long delay, long timeInterval, float step, float distance) {
+        if (simulationFingering) {
+            printLog("simulationPullDown return");
+            return;
+        }
+        printLog("simulationPullDown");
+        simulationFingering = true;
+        if (simulationFingersTimer == null) {
+            simulationFingersTimer = new Timer();
+        } else {
+            simulationFingersTimer.cancel();
+            simulationFingersTimer = new Timer();
+        }
+        simulationFingersTimeInterval = timeInterval;
+        simulationFingersStep = step;
+        simulationFingersAllNumber = distance % step == 0 ? (int) (distance / step) : (int) (distance / step) + 1;
+        simulationFingersTimer.schedule(new TimerTask() {
+            private int i = 0;
+
+            @Override
+            public void run() {
+                i++;
+                autoFreshHandler.sendEmptyMessage(i);
+            }
+        }, delay, simulationFingersTimeInterval);
+    }
+
+    //完成模拟手指滑动
+    private void completeSimulation() {
+        printLog("completeSimulation");
+        if (simulationFingersTimer != null) {
+            simulationFingersTimer.cancel();
+        }
+        simulationFingering = false;
+    }
+
+    private Handler autoFreshHandler = new Handler() {
+        private long downTime;
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            int action;
+            if (msg.what == 1) {
+                action = MotionEvent.ACTION_DOWN;
+                downTime = SystemClock.currentThreadTimeMillis();
+            } else if (msg.what < simulationFingersAllNumber) {
+                action = MotionEvent.ACTION_MOVE;
+            } else {
+                action = MotionEvent.ACTION_UP;
+            }
+            float dy = (msg.what - 1) *simulationFingersStep + getTop();
+            float y = pullImageView.getDistancePull(dy, 0);
+            MotionEvent motionEvent = MotionEvent.obtain(downTime,
+                    SystemClock.currentThreadTimeMillis(),
+                    action, getLeft(), y, SIMULATION_META_STATE);
+            dispatchTouchEvent(motionEvent);
+            if (msg.what >= simulationFingersAllNumber) {
+                completeSimulation();
+            }
+        }
+    };
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
@@ -125,6 +219,7 @@ public class TouchPullView extends RelativeLayout {
         pullImageView = getPullView();
         pullImageView.touchPullView = this;
         this.addView(pullImageView, this.getChildCount());
+
     }
 
     //获取刷新和加载控件
@@ -144,6 +239,15 @@ public class TouchPullView extends RelativeLayout {
             return;
         }
         super.requestDisallowInterceptTouchEvent(disallowIntercept);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        //模拟触摸时不可以真实触摸
+        if (simulationFingering && ev.getMetaState() != SIMULATION_META_STATE) {
+            return true;
+        }
+        return super.dispatchTouchEvent(ev);
     }
 
     /**
@@ -189,13 +293,13 @@ public class TouchPullView extends RelativeLayout {
                     Direction direction = new Direction();
                     View firstView = absListView.getChildAt(0);
                     View lastView = absListView.getChildAt(absListView.getChildCount() - 1);
-                    if (absListView.getFirstVisiblePosition() == 0 &&
-                            firstView.getTop() >= view.getTop()) {
+                    if (absListView.getFirstVisiblePosition() == 0 && (firstView == null ||
+                            firstView.getTop() >= view.getTop())) {
                         printLog("顶部");
                         direction.addDirection(Direction.DOWN_PULL);
                     }
-                    if (absListView.getLastVisiblePosition() == (absListView.getCount() - 1) &&
-                            lastView.getBottom() <= view.getBottom()) {
+                    if (absListView.getLastVisiblePosition() == (absListView.getCount() - 1) && (lastView == null ||
+                            lastView.getBottom() <= view.getBottom())) {
                         printLog("底部");
                         direction.addDirection(Direction.UP_PULL);
                     }
@@ -313,11 +417,11 @@ public class TouchPullView extends RelativeLayout {
         }
         printLog("locationY:" + locationY);
         pullImageView.setLocation(pullImageView.getLeft(), locationY);
-        pullImageView.setProgressRotation(event.getY() , this.startY);
+        pullImageView.setProgressRotation(event.getY(), this.startY);
 
         //判断是否拉拽到一定距离
-        if ((direction.type == Direction.DOWN_PULL && pullImageView.getTopRelativeParentOfParent() - this.getTop() >= pullImageView.MOVE_DISTANCE) ||
-                (direction.type == Direction.UP_PULL && this.getBottom() - pullImageView.getBottomRelativeParentOfParent() >= pullImageView.MOVE_DISTANCE)) {
+        if ((direction.type == Direction.DOWN_PULL && pullImageView.getTopRelativeParentOfParent() - this.getTop() >= pullImageView.getMoveDistance()) ||
+                (direction.type == Direction.UP_PULL && this.getBottom() - pullImageView.getBottomRelativeParentOfParent() >= pullImageView.getMoveDistance())) {
             printLog("刷新或加载");
             pullImageView.toReachCriticalValue();//到达刷新加载条件
             if (action == MotionEvent.ACTION_UP) {

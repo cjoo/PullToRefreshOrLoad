@@ -31,6 +31,14 @@ public class GridViewActivity extends Activity implements TouchPullListener {
         touchPullView.setTouchPullListener(this);
 //        touchPullView.setDirectionEnable(TouchPullView.Direction.DOWN_PULL);
     }
+    public void simulationPullDown(View view) {
+        touchPullView.autoRefresh();
+    }
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        touchPullView.autoRefresh();
+    }
 
     private Handler handler = new Handler() {
         @Override
@@ -73,7 +81,7 @@ public class GridViewActivity extends Activity implements TouchPullListener {
     }
 
     class MyAdapter extends BaseAdapter {
-        public int count = 20;
+        public int count = 0;
 
         @Override
         public int getCount() {

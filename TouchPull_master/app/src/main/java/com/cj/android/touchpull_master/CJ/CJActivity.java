@@ -31,7 +31,11 @@ public class CJActivity extends Activity implements TouchPullListener {
         touchPullView = (TouchPullView) findViewById(R.id.touchPullView);
         touchPullView.setTouchPullListener(this);
     }
-
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        touchPullView.autoRefresh();
+    }
 
     private Handler handler = new Handler() {
         @Override

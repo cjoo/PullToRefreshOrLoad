@@ -65,6 +65,7 @@ public class ViewPagerActivity extends FragmentActivity {
             listView.setAdapter(myAdapter = new ListViewActivity.MyAdapter(getActivity()));
             touchPullView = (TouchPullView) view.findViewById(R.id.touchPullView);
             touchPullView.setTouchPullListener(this);
+            view.findViewById(R.id.re).setVisibility(View.GONE);
             return view;
         }
 

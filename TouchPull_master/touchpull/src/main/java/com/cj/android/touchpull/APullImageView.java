@@ -11,7 +11,6 @@ import android.widget.ImageView;
  */
 public abstract class APullImageView extends ImageView {
     public TouchPullView touchPullView;//父控件
-    public int MOVE_DISTANCE;//当pullImageView移动距离达到该值+this.getHeight()时，达到临界值。
 
     public APullImageView(Context context) {
         super(context);
@@ -25,10 +24,18 @@ public abstract class APullImageView extends ImageView {
         super(context, attrs, defStyleAttr);
     }
 
+    protected void init() {
+        setVisibility(INVISIBLE);
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        this.MOVE_DISTANCE = this.getHeight();
+    }
+
+    //当pullImageView移动距离达到该值+this.getHeight()时，达到临界值。
+    public int getMoveDistance() {
+        return this.getHeight();
     }
 
     /**
@@ -122,4 +129,14 @@ public abstract class APullImageView extends ImageView {
         return (int) (currentY - startY) / 3;
     }
 
+    /**
+     * 拉拽距离转换为触摸距离
+     *
+     * @param currentY 当前触摸Y坐标
+     * @param startY   到达刷新或加载条件时的触摸Y坐标
+     * @return
+     */
+    public int getDistancePull(float currentY, float startY) {
+        return (int) (currentY - startY) * 3;
+    }
 }

@@ -5,6 +5,8 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.Nullable;
+import android.view.ActionMode;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -42,10 +44,16 @@ public class ListViewActivity extends Activity implements TouchPullListener {
                 "坐驾：宝马血统，真皮座椅，座椅加热，零污染，360度全景天窗，定速巡航，四驱，两座，中央差速，全时四驱，全地形模式，" +
                 "非承载底盘，声控自动挡！控制方式：前进：得儿驾~~~~。刹车：吁~~~~。零油耗，百公里只需一捆草。。。有需要的速与我联系" +
                 "！");
-        listView.addHeaderView(textView);
+//        listView.addHeaderView(textView);
         listView.setAdapter(myAdapter = new MyAdapter(this));
         touchPullView.setRefreshingOrLoadingOverScrollEnabled(false);
         touchPullView.setTouchPullListener(this);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        touchPullView.autoRefresh();
     }
 
     private Handler handler = new Handler() {
@@ -55,12 +63,17 @@ public class ListViewActivity extends Activity implements TouchPullListener {
             touchPullView.complete();
             if (msg.what == 1) {
                 myAdapter.count = 20;
-            }else{
+            } else {
                 myAdapter.count += 20;
             }
             myAdapter.notifyDataSetChanged();
         }
     };
+
+    public void simulationPullDown(View view) {
+        touchPullView.autoRefresh();
+//        touchPullView.simulationPullDown(0, 10, 5, 200);
+    }
 
     @Override
     public void refresh() {
@@ -94,7 +107,7 @@ public class ListViewActivity extends Activity implements TouchPullListener {
 
     public static class MyAdapter extends BaseAdapter {
         private Context context;
-        public int count = 20;
+        public int count = 0;
 
         public MyAdapter(Context context) {
             this.context = context;

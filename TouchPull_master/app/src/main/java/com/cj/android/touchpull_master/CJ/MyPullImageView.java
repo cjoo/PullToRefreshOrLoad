@@ -52,7 +52,7 @@ public class MyPullImageView extends DefaultPullImageView {
 //        super.setProgressRotation(currentY, startY);
         Log.i(TAG, "currentY:" + currentY + " startY:" + startY);
         mProgress.showArrow(true);
-        float endAngle = (float) Math.abs(getPullDistance(currentY, startY)) / (MOVE_DISTANCE + this.getHeight());
+        float endAngle = (float) Math.abs(getPullDistance(currentY, startY)) / (getMoveDistance() + this.getHeight());
         mProgress.setStartEndTrim(0, Math.min(endAngle, 0.8f));
         if (endAngle >= 0.8f) {
             mProgress.setProgressRotation((endAngle - 0.8f) * 2);
@@ -120,7 +120,11 @@ public class MyPullImageView extends DefaultPullImageView {
             setMeasuredDimension(getMeasuredWidth() + mShadowRadius * 2, getMeasuredHeight()
                     + mShadowRadius * 2);
         }
-        MOVE_DISTANCE = 50;
+    }
+
+    @Override
+    public int getMoveDistance() {
+        return 50;
     }
 
     /**

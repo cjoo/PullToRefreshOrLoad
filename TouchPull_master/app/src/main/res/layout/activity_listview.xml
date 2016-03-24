@@ -3,8 +3,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
+    <Button
+        android:id="@+id/re"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:onClick="simulationPullDown"
+        android:text="simulationPullDown" />
     <ListView
         android:id="@+id/listView"
+        android:layout_above="@id/re"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent" />
 </com.cj.android.touchpull.TouchPullView>

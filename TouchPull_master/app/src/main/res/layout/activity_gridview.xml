@@ -7,11 +7,13 @@
         android:id="@+id/t"
         android:layout_width="match_parent"
         android:layout_height="50dp" />
-    <TextView
+    <Button
         android:id="@+id/t2"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_alignParentBottom="true"/>
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:onClick="simulationPullDown"
+        android:text="simulationPullDown" />
     <com.cj.android.touchpull.TouchPullView
         android:id="@+id/touchPullView"
         android:layout_below="@id/t"
