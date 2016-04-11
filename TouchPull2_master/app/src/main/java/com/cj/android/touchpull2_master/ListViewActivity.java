@@ -17,10 +17,11 @@ import com.cj.android.touchpull2.TouchPullListener;
 /**
  * Created by maesinfo-024 on 2016/2/2.
  */
-public class ListViewActivity extends Activity implements TouchPullListener{
+public class ListViewActivity extends Activity implements TouchPullListener {
     private ListView listView;
     private MyAdapter myAdapter;
     private TouchPull2View touchPull2View;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,8 +30,10 @@ public class ListViewActivity extends Activity implements TouchPullListener{
         listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(myAdapter = new MyAdapter(this));
 
-        touchPull2View= (TouchPull2View) findViewById(R.id.touchPull2View);
+        touchPull2View = (TouchPull2View) findViewById(R.id.touchPull2View);
         touchPull2View.setTouchPullListener(this);
+        touchPull2View.autoFresh();
+
     }
 
     private Handler handler = new Handler() {
@@ -40,7 +43,7 @@ public class ListViewActivity extends Activity implements TouchPullListener{
             touchPull2View.complete();
             if (msg.what == 1) {
                 myAdapter.count = 20;
-            }else{
+            } else {
                 myAdapter.count += 20;
             }
             myAdapter.notifyDataSetChanged();

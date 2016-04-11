@@ -1,13 +1,16 @@
 package com.cj.android.touchpull2;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
-import android.view.animation.RotateAnimation;
 
 /**
  * Created by jian.cao on 2016/2/2.
@@ -23,12 +26,14 @@ public class DefaultPullView extends BasePullView {
 
     //和myTimer一起实现回滚和取消动画
     private Handler handler = new Handler() {
+        private float lastCurrentY;
+
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what) {
                 case CANCELING:
-                    touchPull2View.pullY -= (float) msg.obj;
+                    touchPull2View.pullY -= (float) msg.obj * (1 + Math.abs(touchPull2View.pullY) / 180f);
                     if ((touchPull2View.pullY <= 0 && direction.type == Direction.DOWN_PULL)
                             || (touchPull2View.pullY >= 0 && direction.type == Direction.UP_PULL)) {
                         touchPull2View.pullY = 0;
@@ -37,7 +42,7 @@ public class DefaultPullView extends BasePullView {
                     touchPull2View.requestLayout();
                     break;
                 case ROLLING:
-                    touchPull2View.pullY -= (float) msg.obj;
+                    touchPull2View.pullY -= (float) msg.obj * (1 + Math.abs(touchPull2View.pullY) / 180f);
                     if (touchPull2View.pullY <= downPullView.getMeasuredHeight() && direction.type == Direction.DOWN_PULL) {
                         myTimer.cancel();
                         touchPull2View.pullY = downPullView.getMeasuredHeight();
@@ -53,51 +58,94 @@ public class DefaultPullView extends BasePullView {
                     }
                     touchPull2View.requestLayout();
                     break;
+                case AUTO_FRESH:
+                    int height = downPullView.getMeasuredHeight();
+                    if (height > 0) {
+                        if (touchPull2View.pullY >= height) {
+                            myTimer.cancel();
+                            touchPull2View.pullY = height;
+                            motionUp();
+                        } else {
+                            pull(lastCurrentY += height / 15f);
+                        }
+                        touchPull2View.requestLayout();
+                    }
+                    break;
             }
         }
     };
     private MyTimer myTimer = new MyTimer(handler);//和handler一起实现回滚和取消动画
 
-    private RotateAnimation defaultRefreshingAnimation;
+    private ObjectAnimator defaultRefreshAnimation;
 
     private void startRefreshAnimation() {
-        if (defaultRefreshingAnimation == null) {
-            defaultRefreshingAnimation = new RotateAnimation(0f, 360f, 0.5f * downPullView.getWidth(), 0.5f * downPullView.getHeight());
-            defaultRefreshingAnimation.setDuration(600);
-            defaultRefreshingAnimation.setFillAfter(true);
-            defaultRefreshingAnimation.setRepeatCount(Animation.INFINITE);
-            LinearInterpolator lir = new LinearInterpolator();
-            defaultRefreshingAnimation.setInterpolator(lir);
-        } else {
-
+        if (defaultRefreshAnimation == null) {
+            defaultRefreshAnimation = ObjectAnimator.ofFloat(downPullView, "rotation", 1f + downPullView.getRotation(), 360f + downPullView.getRotation());
+            defaultRefreshAnimation.setRepeatCount(ValueAnimator.INFINITE);
+            defaultRefreshAnimation.setInterpolator(new LinearInterpolator());
+            defaultRefreshAnimation.setDuration(600);
+            defaultRefreshAnimation.start();
         }
-        downPullView.startAnimation(defaultRefreshingAnimation);
     }
 
-    private RotateAnimation defaultLoadingAnimation;
+    private void stopRefreshAnimation() {
+        if (defaultRefreshAnimation != null) {
+            defaultRefreshAnimation.setRepeatCount(0);
+            defaultRefreshAnimation = null;
+        }
+    }
+
+    private ObjectAnimator defaultLoadingAnimation;
 
     private void startLoadAnimation() {
         if (defaultLoadingAnimation == null) {
-            defaultLoadingAnimation = new RotateAnimation(0f, 360f, 0.5f * upPullView.getWidth(), 0.5f * upPullView.getHeight());
+            defaultLoadingAnimation = ObjectAnimator.ofFloat(upPullView, "rotation", 1f + upPullView.getRotation(), 360f + upPullView.getRotation());
+            defaultLoadingAnimation.setRepeatCount(ValueAnimator.INFINITE);
+            defaultLoadingAnimation.setInterpolator(new LinearInterpolator());
             defaultLoadingAnimation.setDuration(600);
-            defaultLoadingAnimation.setFillAfter(true);
-            defaultLoadingAnimation.setRepeatCount(Animation.INFINITE);
-            LinearInterpolator lir = new LinearInterpolator();
-            defaultLoadingAnimation.setInterpolator(lir);
-        } else {
-
+            defaultLoadingAnimation.start();
         }
-        upPullView.startAnimation(defaultLoadingAnimation);
+    }
+
+    private void stopLoadAnimation() {
+        if (defaultLoadingAnimation != null) {
+            defaultLoadingAnimation.setRepeatCount(0);
+            defaultLoadingAnimation = null;
+        }
     }
 
     @Override
     public void reset() {
         myTimer.cancel();
         doMainType = NONE;
-        upPullView.clearAnimation();
-        downPullView.clearAnimation();
+        stopRefreshAnimation();
+        stopLoadAnimation();
+        resetScale(upPullView);
+        resetScale(downPullView);
         touchPull2View.pullY = 0;
         touchPull2View.requestLayout();
+    }
+
+    private ObjectAnimator resetScaleXAnimator, resetScaleYAnimator;
+    private AnimatorSet resetAnimatorSet;
+
+    private void resetScale(View view) {
+        if (resetScaleXAnimator == null) {
+            resetScaleXAnimator = ObjectAnimator.ofFloat(view, "scaleX", 1f);
+        } else {
+            resetScaleXAnimator.setTarget(view);
+        }
+        if (resetScaleYAnimator == null) {
+            resetScaleYAnimator = ObjectAnimator.ofFloat(view, "scaleY", 1f);
+        } else {
+            resetScaleYAnimator.setTarget(view);
+        }
+        if (resetAnimatorSet == null) {
+            resetAnimatorSet = new AnimatorSet();
+            resetAnimatorSet.playTogether(resetScaleXAnimator, resetScaleYAnimator);
+            resetAnimatorSet.setDuration(0);
+        }
+        resetAnimatorSet.start();
     }
 
     @Override
@@ -108,28 +156,42 @@ public class DefaultPullView extends BasePullView {
 
     @Override
     public void pull(float currentY) {
+        boolean rotation = false;
         touchPull2View.pullY = (int) (currentY - startY) / 3;
         if (touchPull2View.pullY >= downPullView.getMeasuredHeight()
                 && direction.type == Direction.DOWN_PULL) {
-            //TODO 达到下拉临界值
+            startRefreshAnimation();
         } else if (touchPull2View.pullY <= -upPullView.getMeasuredHeight()
                 && direction.type == Direction.UP_PULL) {
-            //TODO 达到上拉临界值
+            startLoadAnimation();
         } else {
-            //TODO 没达到临界值
+            stopRefreshAnimation();
+            stopLoadAnimation();
+            rotation = true;
         }
         if (direction.type == Direction.DOWN_PULL) {
             if (touchPull2View.pullY <= 0) {
                 touchPull2View.pullY = 0;
             }
-            downPullView.setRotation(currentY - startY);
+            if (rotation) {
+                downPullView.setRotation(currentY - startY);
+            }
         } else if (direction.type == Direction.UP_PULL) {
             if (touchPull2View.pullY >= 0) {
                 touchPull2View.pullY = 0;
             }
-            upPullView.setRotation(currentY - startY);
+            if (rotation) {
+                upPullView.setRotation(currentY - startY);
+            }
         }
         touchPull2View.requestLayout();
+    }
+
+    @Override
+    public void autoFresh() {
+        doMainType = AUTO_FRESH;
+        start(new Direction(Direction.DOWN_PULL), 0);
+        myTimer.schedule(AUTO_FRESH, 0);//开始循环发送消息给handler
     }
 
     @Override
@@ -159,9 +221,40 @@ public class DefaultPullView extends BasePullView {
         }
     }
 
+    private ObjectAnimator completeScaleXAnimator, completeScaleYAnimator;
+    private AnimatorSet completeAnimatorSet;
+
     @Override
     public void complete() {
-        cancel();
+        doMainType = COMPLETING;
+        View view = upPullView;
+        if (direction.type == Direction.DOWN_PULL) {
+            view = downPullView;
+        }
+        if (completeScaleXAnimator == null) {
+            completeScaleXAnimator = ObjectAnimator.ofFloat(view, "scaleX", 0f);
+        } else {
+            completeScaleXAnimator.setTarget(view);
+        }
+        if (completeScaleYAnimator == null) {
+            completeScaleYAnimator = ObjectAnimator.ofFloat(view, "scaleY", 0f);
+        } else {
+            completeScaleYAnimator.setTarget(view);
+        }
+        if (completeAnimatorSet == null) {
+            completeAnimatorSet = new AnimatorSet();
+            completeAnimatorSet.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    cancel();
+                }
+            });
+            completeAnimatorSet.setInterpolator(new LinearInterpolator());
+            completeAnimatorSet.playTogether(completeScaleXAnimator, completeScaleYAnimator);
+            completeAnimatorSet.setDuration(400);
+        }
+        completeAnimatorSet.start();
     }
 
     @Override
@@ -174,6 +267,14 @@ public class DefaultPullView extends BasePullView {
     public View getUpPullView() {
         upPullView = LayoutInflater.from(context).inflate(R.layout.view_uppull, null);
         return upPullView;
+    }
+
+    @Override
+    public void destroy() {
+        myTimer.destroy();
+        stopRefreshAnimation();
+        stopLoadAnimation();
+        doMainType = NONE;
     }
 
 }

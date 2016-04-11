@@ -22,12 +22,7 @@ public class MyTimer {
     }
 
     public void schedule(int what, Object obj) {
-        if (mTask != null) {
-            mTask.cancel();
-            mTask = null;
-        }
-        mTask = new MyTask(what, obj, handler);
-        timer.schedule(mTask, 0, 15);
+        schedule(what, obj, 15);
     }
 
     public void schedule(int what, Object obj, long period) {
@@ -35,8 +30,10 @@ public class MyTimer {
             mTask.cancel();
             mTask = null;
         }
-        mTask = new MyTask(what, obj, handler);
-        timer.schedule(mTask, 0, period);
+        if (timer != null) {
+            mTask = new MyTask(what, obj, handler);
+            timer.schedule(mTask, 0, period);
+        }
     }
 
     public void cancel() {
@@ -44,6 +41,15 @@ public class MyTimer {
             mTask.cancel();
             mTask = null;
         }
+    }
+
+    public void destroy() {
+        cancel();
+        if (timer != null) {
+            timer.cancel();
+        }
+        timer = null;
+        handler = null;
     }
 
     private class MyTask extends TimerTask {

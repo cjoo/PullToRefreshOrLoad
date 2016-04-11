@@ -56,6 +56,13 @@ public class TouchPull2View extends RelativeLayout {
     }
 
     /**
+     * 置为刷新状态
+     */
+    public void autoFresh() {
+        pullView.autoFresh();
+    }
+
+    /**
      * 使用该控件时，设置ITouchPull接口实现类对象，就可以处理刷新和加载操作了。
      *
      * @param mTouchPull
@@ -129,6 +136,12 @@ public class TouchPull2View extends RelativeLayout {
         //添加上拉view
         this.addView(upPullView = pullView.getUpPullView(), this.getChildCount(),
                 new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        pullView.destroy();
+        super.onDetachedFromWindow();
     }
 
     @Override

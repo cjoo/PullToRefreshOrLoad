@@ -17,6 +17,7 @@ public abstract class BasePullView {
     public static final int COMPLETING = 3;//完成中(刷新加载完成，执行完成动画)
     public static final int CANCELING = 4;//取消中(MotionEvent.ACTION_CANCEL或MotionEvent.ACTION_UP没达到指定距离时执行取消动画)
     public static final int ROLLING = 5;//回滚中（拉拽过远，回滚到指定的位置）
+    public static final int AUTO_FRESH = 6;//自动刷新中（模拟手指触摸）
     public int doMainType = NONE;//正在做的事情,可能的值（NONE，REFRESHING，LOADING，COMPLETING，CANCELING，ROLLING）
 
     public BasePullView(Context context, TouchPull2View touchPull2View) {
@@ -53,6 +54,11 @@ public abstract class BasePullView {
     abstract void pull(float currentY);
 
     /**
+     * 自动刷新
+     */
+    abstract void autoFresh();
+
+    /**
      * 取消
      */
     abstract void cancel();
@@ -80,4 +86,6 @@ public abstract class BasePullView {
      * @return
      */
     abstract View getUpPullView();
+
+    abstract void destroy();
 }
