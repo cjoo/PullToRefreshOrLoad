@@ -83,7 +83,7 @@ public class GridViewActivity extends Activity implements TouchPullListener {
 
     public static class MyAdapter extends BaseAdapter {
         private Context context;
-        public int count = 20;
+        public int count = 0;
 
         public MyAdapter(Context context) {
             this.context = context;

@@ -150,7 +150,7 @@ public class TouchPull2View extends RelativeLayout {
         //实现布局在动的效果
         downPullView.layout(0, pullY - downPullView.getMeasuredHeight(), downPullView.getMeasuredWidth(), pullY);
         pullAbleView.layout(0, pullY, pullAbleView.getMeasuredWidth(), pullY + pullAbleView.getMeasuredHeight());
-        upPullView.layout(0, pullY + pullAbleView.getMeasuredHeight(), upPullView.getMeasuredWidth(), pullY + pullAbleView.getMeasuredHeight() + upPullView.getMeasuredHeight());
+        upPullView.layout(0, pullY + getMeasuredHeight(), upPullView.getMeasuredWidth(), pullY + getMeasuredHeight() + upPullView.getMeasuredHeight());
     }
 
     //获取IPullView
@@ -215,13 +215,13 @@ public class TouchPull2View extends RelativeLayout {
                     Direction direction = new Direction();
                     View firstView = absListView.getChildAt(0);
                     View lastView = absListView.getChildAt(absListView.getChildCount() - 1);
-                    if (absListView.getFirstVisiblePosition() == 0 &&
-                            firstView.getTop() >= view.getTop()) {
+                    if (firstView == null || (absListView.getFirstVisiblePosition() == 0 &&
+                            firstView.getTop() >= view.getTop())) {
                         printLog("顶部");
                         direction.addDirection(Direction.DOWN_PULL);
                     }
-                    if (absListView.getLastVisiblePosition() == (absListView.getCount() - 1) &&
-                            lastView.getBottom() <= view.getBottom()) {
+                    if (lastView == null || (absListView.getLastVisiblePosition() == (absListView.getCount() - 1) &&
+                            lastView.getBottom() <= view.getBottom())) {
                         printLog("底部");
                         direction.addDirection(Direction.UP_PULL);
                     }

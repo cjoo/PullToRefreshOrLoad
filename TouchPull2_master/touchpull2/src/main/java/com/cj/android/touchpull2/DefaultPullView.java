@@ -66,7 +66,7 @@ public class DefaultPullView extends BasePullView {
                             touchPull2View.pullY = height;
                             motionUp();
                         } else {
-                            pull(lastCurrentY += height / 15f);
+                            pull(lastCurrentY += height / 10f);
                         }
                         touchPull2View.requestLayout();
                     }

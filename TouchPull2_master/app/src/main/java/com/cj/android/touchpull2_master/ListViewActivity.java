@@ -32,7 +32,7 @@ public class ListViewActivity extends Activity implements TouchPullListener {
 
         touchPull2View = (TouchPull2View) findViewById(R.id.touchPull2View);
         touchPull2View.setTouchPullListener(this);
-        touchPull2View.autoFresh();
+//        touchPull2View.autoFresh();
 
     }
 
@@ -83,7 +83,7 @@ public class ListViewActivity extends Activity implements TouchPullListener {
 
     public static class MyAdapter extends BaseAdapter {
         private Context context;
-        public int count = 20;
+        public int count = 0;
 
         public MyAdapter(Context context) {
             this.context = context;
