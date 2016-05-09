@@ -226,35 +226,37 @@ public class DefaultPullView extends BasePullView {
 
     @Override
     public void complete() {
-        doMainType = COMPLETING;
-        View view = upPullView;
-        if (direction.type == Direction.DOWN_PULL) {
-            view = downPullView;
+        if (doMainType == REFRESHING || doMainType == LOADING) {
+            doMainType = COMPLETING;
+            View view = upPullView;
+            if (direction.type == Direction.DOWN_PULL) {
+                view = downPullView;
+            }
+            if (completeScaleXAnimator == null) {
+                completeScaleXAnimator = ObjectAnimator.ofFloat(view, "scaleX", 0f);
+            } else {
+                completeScaleXAnimator.setTarget(view);
+            }
+            if (completeScaleYAnimator == null) {
+                completeScaleYAnimator = ObjectAnimator.ofFloat(view, "scaleY", 0f);
+            } else {
+                completeScaleYAnimator.setTarget(view);
+            }
+            if (completeAnimatorSet == null) {
+                completeAnimatorSet = new AnimatorSet();
+                completeAnimatorSet.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        cancel();
+                    }
+                });
+                completeAnimatorSet.setInterpolator(new LinearInterpolator());
+                completeAnimatorSet.playTogether(completeScaleXAnimator, completeScaleYAnimator);
+                completeAnimatorSet.setDuration(400);
+            }
+            completeAnimatorSet.start();
         }
-        if (completeScaleXAnimator == null) {
-            completeScaleXAnimator = ObjectAnimator.ofFloat(view, "scaleX", 0f);
-        } else {
-            completeScaleXAnimator.setTarget(view);
-        }
-        if (completeScaleYAnimator == null) {
-            completeScaleYAnimator = ObjectAnimator.ofFloat(view, "scaleY", 0f);
-        } else {
-            completeScaleYAnimator.setTarget(view);
-        }
-        if (completeAnimatorSet == null) {
-            completeAnimatorSet = new AnimatorSet();
-            completeAnimatorSet.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    super.onAnimationEnd(animation);
-                    cancel();
-                }
-            });
-            completeAnimatorSet.setInterpolator(new LinearInterpolator());
-            completeAnimatorSet.playTogether(completeScaleXAnimator, completeScaleYAnimator);
-            completeAnimatorSet.setDuration(400);
-        }
-        completeAnimatorSet.start();
     }
 
     @Override
